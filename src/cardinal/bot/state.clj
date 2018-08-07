@@ -77,11 +77,7 @@
   [state]
   (get state :research-info))
 
-(defn state-get-units-barraks
-  [state]
-  (get-in state [:units :barraks]))
-
-(defn state-get-units
+(defn state-get-my-units
   [state]
   (get state :units))
 

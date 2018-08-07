@@ -52,7 +52,8 @@
 
 (defn cardinal-onFrame
   [this]
-  (b/on-frame! (.state this)))
+  (let [new-state (b/on-start! @(.state this))]
+    (assoc! (.state this) new-state)))
 
 (defn cardinal-onNukeDetect
   [this target]
@@ -97,7 +98,7 @@
 
 (defn cardinal-onUnitDiscover
   [this unit]
-  (let [new-state (b/on-unit-discover! (.state this) unit)]
+  (let [new-state (b/on-unit-discover @(.state this) unit)]
     (assoc! (.state this) new-state)))
 
 (defn cardinal-onUnitEvade

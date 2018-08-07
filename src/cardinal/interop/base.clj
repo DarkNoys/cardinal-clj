@@ -149,10 +149,10 @@
   (. unit build type pos))
 
 (defn unit-gather
-  [unit type]
+  [unit res]
   {:pre [(s/valid? :bwapi.unit/all
                    unit)]}
-  (. unit gather type))
+  (. unit gather res))
 
 (defn unit-get-distance
   [unit target]
@@ -171,7 +171,15 @@
 
 (defn unit-is-mineral-field
   [unit]
+  {:pre [(s/valid? :bwapi.unit/all
+                   unit)]}
   (. (unit-get-type unit) isMineralField))
+
+(defn unit-get-player
+  [unit]
+  {:pre [(s/valid? :bwapi.unit/all
+                   unit)]}
+  (. unit getPlayer))
 
 ;;;;;;;;;;;;;;;
 ;; Unit-type ;;

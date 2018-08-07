@@ -17,9 +17,8 @@
 
 (defn on-frame!
   [state]
-  (do
-    (research-proc! state)
-    (worker-proc! state)))
+  (-> state
+      (workers-strategy!)))
 
 (defn on-nuke-detect!
   [state target]
@@ -71,14 +70,17 @@
 
 (defn on-unit-discover
   [state unit]
-  (let [unit-type (unit-get-type unit)]
-    (condp #(s/valid? %1 %2) unit-type
-      :bwapi.unit-type/terran-barracks (update-in state [:units :barracks]
-                                                  conj unit)
+  (let [unit-type (unit-get-type unit)
+        unit-player (unit-get-player unit)
+        self (state-get-self state)]
+    (if (= self unit-player)
+      (condp #(s/valid? %1 %2) unit-type
+        :bwapi.unit-type/terran-barracks (update-in state [:units :barracks]
+                                                    conj unit)
 
-      :bwapi.unit-type/worker (update-in state [:units :workers]
-                                         conj unit)
-      state)))
+        :bwapi.unit-type/worker (update-in state [:units :workers]
+                                           conj unit)
+        state))))
 
 
 (defn on-unit-evade!

@@ -504,7 +504,7 @@
    ['lockdown 'Lockdown]
    ['lurker-aspect 'Lurker_Aspect]
    ['maelstrom 'Maelstrom]
-   ['mind-control 'Mind_Control]
+   ['mind-control Mind_Control]
    ['none 'None]
    ['nuclear-strike 'Nuclear_Strike]
    ['optical-flare 'Optical_Flare]
