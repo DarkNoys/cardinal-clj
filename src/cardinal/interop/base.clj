@@ -1,11 +1,7 @@
 (ns cardinal.interop.base
-  (:require
-   [clojure.spec.alpha :as s])
   (:import
-   [bwapi.UnitType]
-   [bwta.BWTA])
-  (:use
-   [cardinal.interop.type]))
+   [bwapi UnitType]
+   [bwta BWTA]))
 
 
 ;;;;;;;;;;;
@@ -21,9 +17,16 @@
 ;;;;;;;;;;
 
 (defn read-map
-  [] (. bwta.BWTA readMap))
-(defn analayze-map [] (. bwta.BWTA analyze))
+  []
+  (. bwta.BWTA readMap))
 
+(defn analayze-map
+  []
+  (. bwta.BWTA analyze))
+
+(defn get-start-locations
+  []
+  (. bwta.BWTA getStartLocations))
 
 ;;;;;;;;;;;;
 ;; Mirror ;;
@@ -31,18 +34,14 @@
 
 (defn start-game
   [mirror]
-  {:pre [(s/valid? :bwapi.mirror/all mirror)]}
   (. mirror startGame))
 
 (defn get-game
   [mirror]
-  {:pre [(s/valid? :bwapi.mirror/all mirror)]
-   :post [(s/valid? :bwapi.game/all %)]} (. mirror getGame))
+  (. mirror getGame))
 
 (defn set-mirror-event-listener
   [mirror listener]
-  {:pre [(s/valid? :bwapi.mirror/all mirror)
-         (s/valid? :bwapi.bw-event-listener/all listener)]}
   (.setEventListener (.getModule mirror) listener))
 
 ;;;;;;;;;;;;;;
@@ -66,9 +65,17 @@
 ;; Game ;;
 ;;;;;;;;;;
 
+(defn game-leave-game
+  [game]
+  (. game leaveGame))
+
 (defn game-get-neutral
   [game]
   (. game neutral))
+
+(defn get-enemies
+  [game]
+  (. game enemies))
 
 (defn get-self
   [game]
@@ -110,48 +117,24 @@
 
 (defn unit-can-build
   ([unit type]
-   {:pre [(s/valid? :bwapi.unit/all
-                    unit)
-          (s/valid? :bwapi.unit-type/all
-                    type)]}
    (. unit canBuild type))
   ([unit type pos]
-   {:pre [(s/valid? :bwapi.unit/all
-                    unit)
-          (s/valid? :bwapi.unit-type/all
-                    type)]}
    (. unit canBuild type pos)))
 
 (defn unit-can-train
   [unit type]
-  {:pre [(s/valid? :bwapi.unit/all
-                   unit)
-         (s/valid? :bwapi.unit-type/all
-                   type)]}
   (. unit canTrain type))
 
 (defn unit-train
   [unit type]
-  {:pre [(s/valid? :bwapi.unit/all
-                   unit)
-         (s/valid? :bwapi.unit-type/all
-                   type)
-         (unit-can-train unit type)]}
   (. unit train type))
 
 (defn unit-build
   [unit type pos]
-  {:pre [(s/valid? :bwapi.unit/all
-                   unit)
-         (s/valid? :bwapi.unit-type/all
-                   type)
-         (unit-can-build unit type)]}
   (. unit build type pos))
 
 (defn unit-gather
   [unit res]
-  {:pre [(s/valid? :bwapi.unit/all
-                   unit)]}
   (. unit gather res))
 
 (defn unit-get-distance
@@ -164,21 +147,15 @@
 
 (defn unit-is-worker?
   [unit]
-  {:pre [(s/valid? :bwapi.unit/all
-                   unit)]}
   (let [u-type (unit-get-type unit)]
     (. u-type isWorker)))
 
 (defn unit-is-mineral-field
   [unit]
-  {:pre [(s/valid? :bwapi.unit/all
-                   unit)]}
   (. (unit-get-type unit) isMineralField))
 
 (defn unit-get-player
   [unit]
-  {:pre [(s/valid? :bwapi.unit/all
-                   unit)]}
   (. unit getPlayer))
 
 ;;;;;;;;;;;;;;;
@@ -190,7 +167,3 @@
   (. type isRefinery))
 
 
-
-;;;;;;;;;;
-;; BWTA ;;
-;;;;;;;;;;

@@ -1,11 +1,11 @@
 (ns cardinal.bot
   (:require
-   [clojure.spec.alpha :as s])
-  (:import
-   [bwapi TilePosition])
-  (:use
-   [cardinal.bot state alg strategy]
-   [cardinal.interop base type]))
+   [taoensso.timbre :as timbre
+    :refer [log  trace  debug  info  warn  error  fatal  report
+            logf tracef debugf infof warnf errorf fatalf reportf
+            spy get-env]]
+   [cardinal.bot.managers :as m]
+   [cardinal.interop.base :as b]))
 
 ;;;;;;;;;;;;;;;;;;;;
 ;; Base listeners ;;
@@ -17,8 +17,27 @@
 
 (defn on-frame!
   [state]
-  (-> state
-      (workers-strategy!)))
+ ; (info "Frame")
+ ; (info "Update micromanagers...")
+  (info (-> state
+            :micromanagers
+            (first)
+            :fsm
+            :state))
+  (try
+    (m/update-managers state (:micromanagers state)) ;
+    (catch Exception e (error e)))
+  (let [player (:player state)
+        units (b/get-units player)
+        workers (filter b/unit-is-worker? units)]
+    (if (empty? (:micromanagers state))
+      (let [worker (first workers)
+            manager (m/make-micromanager state [worker] m/researcher-model)]
+        (info "Create reseach manager...")
+        (-> state
+            (update :micromanagers #(conj % manager))))
+      state)))
+
 
 (defn on-nuke-detect!
   [state target]
@@ -46,15 +65,20 @@
 
 (defn on-start!
   [state]
-  (let [mirror (:mirror @state)
-        game (get-game mirror)
-        self (get-self game)]
+  (info "Start game")
+  (let [mirror (:mirror state)
+        game (b/get-game mirror)
+        self (b/get-self game)
+        enemies (b/get-enemies game)]
     (do
-      (read-map)
-      (analayze-map))
-    (-> @state
-        (swap-key :game self)
-        (swap-key :self game))))
+      (info "Read map...")
+      (b/read-map)
+      (info "Analayze map...")
+      (b/analayze-map))
+    (-> state
+        (assoc :enemies (apply vector enemies))
+        (assoc :player self)
+        (assoc :game game))))
 
 (defn on-unit-complete!
   [state unit]
@@ -68,19 +92,9 @@
   [state unit]
   state)
 
-(defn on-unit-discover
+(defn on-unit-discover!
   [state unit]
-  (let [unit-type (unit-get-type unit)
-        unit-player (unit-get-player unit)
-        self (state-get-self state)]
-    (if (= self unit-player)
-      (condp #(s/valid? %1 %2) unit-type
-        :bwapi.unit-type/terran-barracks (update-in state [:units :barracks]
-                                                    conj unit)
-
-        :bwapi.unit-type/worker (update-in state [:units :workers]
-                                           conj unit)
-        state))))
+  state)
 
 
 (defn on-unit-evade!
@@ -102,5 +116,3 @@
 (defn on-unit-show!
   [state unit]
   state)
-
-
