@@ -18,3 +18,10 @@ pom.xml.asc
 .lein-plugins/
 .lein-failures
 .cpcache/
+
+bwapi_bridge2_6.dll
+libgmp-10.dll
+libmpfr-4.dll
+/.eastwood
+
+/log/
