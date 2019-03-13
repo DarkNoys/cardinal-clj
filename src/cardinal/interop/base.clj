@@ -3,14 +3,100 @@
    [bwapi UnitType]
    [bwta BWTA]))
 
+;;;;;;;;;;
+;; Unit ;;
+;;;;;;;;;;
 
-;;;;;;;;;;;
-;; Utils ;;
-;;;;;;;;;;;
+(defn unit-move
+  [unit position]
+  (.move unit position))
 
-(defn swap-key
-  [object key val]
-  (merge object {key val}))
+(defn unit-get-type
+  [unit]
+  (.getType unit))
+
+(defn unit-is-idle?
+  [unit]
+  (.isIdle unit))
+
+(defn unit-can-build
+  ([unit utype]
+   (.canBuild unit utype))
+  ([unit utype pos]
+   (.canBuild unit utype pos)))
+
+(defn unit-can-train
+  [unit utype]
+  (.canTrain unit utype))
+
+(defn unit-train
+  [unit utype]
+  (.train unit utype))
+
+(defn unit-build
+  [unit utype pos]
+  (.build unit utype pos))
+
+(defn unit-gather
+  [unit res]
+  (.gather unit res))
+
+(defn unit-get-distance
+  [unit target]
+  (.getDistance unit target))
+
+(defn unit-get-tile-position
+  [unit]
+  (.getTilePosition unit))
+
+(defn unit-is-worker?
+  [unit]
+  (let [u-type (unit-get-type unit)]
+    (.isWorker u-type)))
+
+(defn unit-is-mineral-field
+  [unit]
+  (.isMineralField (unit-get-type unit)))
+
+(defn unit-get-player
+  [unit]
+  (.getPlayer unit))
+
+;;;;;;;;;;;;;;;
+;; Unit-type ;;
+;;;;;;;;;;;;;;;
+
+(defn unit-type-is-refinery
+  [utype]
+  (.isRefinery utype))
+
+(defn unit-type-is-mineral-field
+  [utype]
+  (.isMineralField utype))
+
+;;;;;;;;;;;;;;;;;;;
+;; Base Location ;;
+;;;;;;;;;;;;;;;;;;;
+
+(defn bl-get-position
+  [bl]
+  (.getPosition bl))
+
+;;;;;;;;;;;;;;;;;;;
+;; Base-Location ;;
+;;;;;;;;;;;;;;;:;;;
+
+(defn base-get-position
+  [base]
+  (.getPosition base))
+
+(defn base-get-title-position
+  [base]
+  (.getTilePosition base))
+
+(defn base-get-region
+  [base]
+  (.getRegion base))
 
 ;;;;;;;;;;
 ;; BWTA ;;
@@ -34,11 +120,11 @@
 
 (defn start-game
   [mirror]
-  (. mirror startGame))
+  (.startGame mirror))
 
 (defn get-game
   [mirror]
-  (. mirror getGame))
+  (.getGame mirror))
 
 (defn set-mirror-event-listener
   [mirror listener]
@@ -50,7 +136,7 @@
 
 (defn position-get-approx-distance
   [pos other-pos]
-  (. pos getApproxDistance other-pos))
+  (.getApproxDistance pos other-pos))
 
 ;;;;;;;;;;
 ;; Tile ;;
@@ -58,7 +144,7 @@
 
 (defn tile-position-get-distance
   [pos other-pos]
-  (. pos getDistance other-pos))
+  (.getDistance pos other-pos))
 
 
 ;;;;;;;;;;
@@ -67,27 +153,42 @@
 
 (defn game-leave-game
   [game]
-  (. game leaveGame))
+  (.leaveGame game))
 
 (defn game-get-neutral
   [game]
-  (. game neutral))
+  (.neutral game))
+
+(defn game-get-minerals
+  [game]
+  (-> game
+      (game-get-neutral)
+      (#(filter (fn [unit]
+                  (-> unit
+                      (unit-get-type)
+                      (unit-type-is-mineral-field)))
+                %))))
+
+
+(defn get-allies
+  [game]
+  (.allies game))
 
 (defn get-enemies
   [game]
-  (. game enemies))
+  (.enemies game))
 
 (defn get-self
   [game]
-  (. game self))
+  (.self game))
 
 (defn game-can-build-here
   [game tpos unit-type]
-  (. game canBuildHere tpos unit-type))
+  (.canBuildHere game tpos unit-type))
 
 (defn game-get-all-units
   [game]
-  (. game getAllUnits))
+  (.getAllUnits game))
 
 ;;;;;;;;;;;;
 ;; Player ;;
@@ -95,75 +196,12 @@
 
 (defn get-units
   [player]
-  (. player getUnits))
+  (.getUnits player))
 
 (defn player-get-minerals
   [player]
-  (. player minerals))
+  (.minerals player))
 
-
-;;;;;;;;;;
-;; Unit ;;
-;;;;;;;;;;
-
-
-(defn unit-get-type
-  [unit]
-  (. unit getType))
-
-(defn unit-is-idle?
-  [unit]
-  (. unit isIdle))
-
-(defn unit-can-build
-  ([unit type]
-   (. unit canBuild type))
-  ([unit type pos]
-   (. unit canBuild type pos)))
-
-(defn unit-can-train
-  [unit type]
-  (. unit canTrain type))
-
-(defn unit-train
-  [unit type]
-  (. unit train type))
-
-(defn unit-build
-  [unit type pos]
-  (. unit build type pos))
-
-(defn unit-gather
-  [unit res]
-  (. unit gather res))
-
-(defn unit-get-distance
-  [unit target]
-  (. unit getDistance target))
-
-(defn unit-get-tile-position
-  [unit]
-  (. unit getTilePosition))
-
-(defn unit-is-worker?
-  [unit]
-  (let [u-type (unit-get-type unit)]
-    (. u-type isWorker)))
-
-(defn unit-is-mineral-field
-  [unit]
-  (. (unit-get-type unit) isMineralField))
-
-(defn unit-get-player
-  [unit]
-  (. unit getPlayer))
-
-;;;;;;;;;;;;;;;
-;; Unit-type ;;
-;;;;;;;;;;;;;;;
-
-(defn unit-type-is-refinery
-  [type]
-  (. type isRefinery))
-
-
+(defn player-get-start-location
+  [player]
+  (.getStartLocation player))

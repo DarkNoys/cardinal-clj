@@ -1,5 +1,6 @@
 (ns cardinal.core
   (:require
+   [clojure.tools.nrepl.server :refer [start-server stop-server]]
    [cardinal.bot :as b]
    [cardinal.interop.base :refer :all]
    [clj-time.local :as l]
@@ -13,12 +14,11 @@
    [bwapi DefaultBWListener Mirror]
    [clojure.lang IDeref]))
 
-
 ;;
 ;; Main class fun
 ;;
 (gen-class
- :name "cardinal.core"
+ :name "Cardinal"
  :implements [clojure.lang.IDeref]
  :state state
  :init init
@@ -35,7 +35,7 @@
              :game nil
              :map-history []
              :enemies []
-             :alies []
+             :allies []
              :player nil
              :macromanagers []
              :micromanagers []})])
@@ -46,24 +46,26 @@
     (set-mirror-event-listener mirror this)
     (start-game mirror)))
 
-(defonce ^:dynamic *AI* (atom nil))
 (defn cardinal-main
   [& args]
-;;  (start-server :port 7888)
-  (let [ai (cardinal.core.)]
-    (timbre/refer-timbre)
-    (timbre/merge-config!
-     {:appenders
-      {:spit
-       (appenders/spit-appender
-        {:fname "debug.log"})}})
-        ;;{:fname (format
-        ;;         "log/%s.log"
-        ;;         (f/unparse
-        ;;          (f/formatter "yyyy_MM_dd_H_m")
-        ;;          (l/local-now))}})
-    (reset! *AI* ai)
-    (.run ai)))
+  (let [ai (cardinal.core.)
+        server (start-server :port 7632)]
+    (try
+      (timbre/refer-timbre)
+      (timbre/merge-config!
+       {:appenders
+        {:spit
+         (appenders/spit-appender
+          ;;{:fname "log/debug.log"}
+          {:fname (format
+                   "log/debug_%s.log"
+                   (f/unparse
+                    (f/formatter "yyyy_MM_dd")
+                    (l/local-now)))})}})
+      (info "Start Bot")
+      (.run ai)
+      (finally
+        (stop-server server)))))
 
 ;;
 ;; dref
@@ -79,72 +81,198 @@
 
 (defn cardinal-onEnd
   [this is-winner]
-  (reset! (.state this) (b/on-end! @(.state this) is-winner)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-end! state is-winner))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onFrame
   [this]
-  (reset! (.state this) (b/on-frame! @(.state this))))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-frame! state))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onNukeDetect
   [this target]
-  (reset! (.state this) (b/on-nuke-detect! @(.state this) target)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-nuke-detect! state target))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onPlayerDropped
   [this player]
-  (reset! (.state this) (b/on-player-dropped! @(.state this) player)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-player-dropped! state player))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onPlayerLeft
   [this player]
-  (reset! (.state this) (b/on-player-left! @(.state this) player)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-player-left! state player))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onReceiveText
   [this player text]
-  (reset! (.state this) (b/on-receive-text! @(.state this) player text)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-receive-text! state player text))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onSaveGame
   [this game-name]
-  (reset! (.state this) (b/on-save-game! @(.state this) game-name)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-save-game! state game-name))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onSendText
   [this text]
-  (reset! (.state this) (b/on-send-text! @(.state this) text)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-send-text! state text))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onStart
   [this]
-  (reset! (.state this) (b/on-start! @(.state this))))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-start! state))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onUnitComplete
   [this unit]
-  (reset! (.state this) (b/on-unit-complete! @(.state this) unit)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-unit-complete! state unit))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onUnitCreate
   [this unit]
-  (reset! (.state this) (b/on-unit-create! @(.state this) unit)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-unit-create! state unit))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onUnitDestroy
   [this unit]
-  (reset! (.state this) (b/on-unit-destroy! @(.state this) unit)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-unit-destroy! state unit))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onUnitDiscover
   [this unit]
-  (reset! (.state this) (b/on-unit-discover! @(.state this) unit)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-unit-discover! state unit))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onUnitEvade
   [this unit]
-  (reset! (.state this) (b/on-unit-evade! @(.state this) unit)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-unit-evade! state unit))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onUnitHide
   [this unit]
-  (reset! (.state this) (b/on-unit-hide! @(.state this) unit)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-unit-hide! state unit))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onUnitMorph
   [this unit]
-  (reset! (.state this) (b/on-unit-morph! @(.state this) unit)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-unit-morph! state unit))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onUnitRenegade
   [this unit]
-  (reset! (.state this) (b/on-unit-renegade! @(.state this) unit)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-unit-renegade! state unit))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
 
 (defn cardinal-onUnitShow
   [this unit]
-  (reset! (.state this) (b/on-unit-show! @(.state this) unit)))
+  (let [state (.state this)
+        old-state @state]
+    (try
+      (reset! state (b/on-unit-show! state unit))
+      (catch Exception e
+        (do
+          (error (.getMessage e))
+          (reset! state old-state))))))
