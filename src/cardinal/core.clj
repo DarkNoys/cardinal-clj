@@ -1,8 +1,8 @@
 (ns cardinal.core
   (:require
    [clojure.tools.nrepl.server :refer [start-server stop-server]]
-   [cardinal.bot :as b]
-   [cardinal.interop.base :refer :all]
+   [cardinal.bot :as bot]
+   [cardinal.interop.base :as b]
    [clj-time.local :as l]
    [clj-time.format :as f]
    [taoensso.timbre.appenders.core :as appenders]
@@ -43,8 +43,8 @@
 (defn cardinal-run
   [this]
   (let [mirror (get-in @(.state this) [:mirror])]
-    (set-mirror-event-listener mirror this)
-    (start-game mirror)))
+    (b/set-mirror-event-listener mirror this)
+    (b/start-game mirror)))
 
 (defn cardinal-main
   [& args]
@@ -61,7 +61,7 @@
                    "log/debug_%s.log"
                    (f/unparse
                     (f/formatter "yyyy_MM_dd")
-                    (l/local-now)))})}})
+                    (l/ocal-now)))})}})
       (info "Start Bot")
       (.run ai)
       (finally
@@ -84,7 +84,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-end! state is-winner))
+      (reset! state (bot/on-end! state is-winner))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -95,7 +95,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-frame! state))
+      (reset! state (bot/on-frame! state))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -106,7 +106,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-nuke-detect! state target))
+      (reset! state (bot/on-nuke-detect! state target))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -117,7 +117,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-player-dropped! state player))
+      (reset! state (bot/on-player-dropped! state player))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -128,7 +128,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-player-left! state player))
+      (reset! state (bot/on-player-left! state player))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -139,7 +139,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-receive-text! state player text))
+      (reset! state (bot/on-receive-text! state player text))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -150,7 +150,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-save-game! state game-name))
+      (reset! state (bot/on-save-game! state game-name))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -161,7 +161,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-send-text! state text))
+      (reset! state (bot/on-send-text! state text))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -172,7 +172,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-start! state))
+      (reset! state (bot/on-start! state))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -183,7 +183,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-unit-complete! state unit))
+      (reset! state (bot/on-unit-complete! state unit))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -194,7 +194,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-unit-create! state unit))
+      (reset! state (bot/on-unit-create! state unit))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -205,7 +205,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-unit-destroy! state unit))
+      (reset! state (bot/on-unit-destroy! state unit))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -216,7 +216,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-unit-discover! state unit))
+      (reset! state (bot/on-unit-discover! state unit))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -227,7 +227,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-unit-evade! state unit))
+      (reset! state (bot/on-unit-evade! state unit))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -238,7 +238,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-unit-hide! state unit))
+      (reset! state (bot/on-unit-hide! state unit))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -249,7 +249,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-unit-morph! state unit))
+      (reset! state (bot/on-unit-morph! state unit))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -260,7 +260,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-unit-renegade! state unit))
+      (reset! state (bot/on-unit-renegade! state unit))
       (catch Exception e
         (do
           (error (.getMessage e))
@@ -271,7 +271,7 @@
   (let [state (.state this)
         old-state @state]
     (try
-      (reset! state (b/on-unit-show! state unit))
+      (reset! state (bot/on-unit-show! state unit))
       (catch Exception e
         (do
           (error (.getMessage e))

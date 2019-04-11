@@ -3,62 +3,90 @@
    [bwapi UnitType]
    [bwta BWTA]))
 
+;;;;;;;;;;;;;;;;
+;; Event type ;;
+;;;;;;;;;;;;;;;;
+
+(def ^{:const true}
+  event-type
+  #{:start
+    :end
+    :frame
+    :nuke-detect
+    :player-dropped
+    :player-left
+    :receive-text
+    :save-game
+    :send-text
+    :unit-complete
+    :unit-create
+    :unit-destroy
+    :unit-discover
+    :unit-evade
+    :unit-hide
+    :unit-morph
+    :unit-renegade
+    :unit-show})
+
 ;;;;;;;;;;
 ;; Unit ;;
 ;;;;;;;;;;
 
-(defn unit-move
+(defn move
   [unit position]
   (.move unit position))
 
-(defn unit-get-type
+(defn get-type
   [unit]
   (.getType unit))
 
-(defn unit-is-idle?
+(defn is-idle?
   [unit]
   (.isIdle unit))
 
-(defn unit-can-build
+(defn can-build?
   ([unit utype]
    (.canBuild unit utype))
   ([unit utype pos]
    (.canBuild unit utype pos)))
 
-(defn unit-can-train
+(defn can-train?
   [unit utype]
   (.canTrain unit utype))
 
-(defn unit-train
+(defn train
   [unit utype]
   (.train unit utype))
 
-(defn unit-build
+(defn is-train?
+  [unit]
+  (.isTraining unit))
+
+(defn build
   [unit utype pos]
   (.build unit utype pos))
 
-(defn unit-gather
+(defn gather
   [unit res]
   (.gather unit res))
 
-(defn unit-get-distance
+(defn get-distance
   [unit target]
   (.getDistance unit target))
 
-(defn unit-get-tile-position
+(defn get-tile-position
   [unit]
   (.getTilePosition unit))
 
-(defn unit-is-worker?
-  [unit]
-  (let [u-type (unit-get-type unit)]
-    (.isWorker u-type)))
+(defn is-worker?
+  [unit-type]
+  (.isWorker unit-type))
 
-(defn unit-is-mineral-field
-  [unit]
-  (.isMineralField (unit-get-type unit)))
+(defn is-mineral-field?
+  [unit-type]
+  (.isMineralField unit-type))
 
-(defn unit-get-player
+(defn get-player
   [unit]
   (.getPlayer unit))
 
@@ -66,35 +94,27 @@
 ;; Unit-type ;;
 ;;;;;;;;;;;;;;;
 
-(defn unit-type-is-refinery
+(defn type-is-refinery
   [utype]
   (.isRefinery utype))
 
-(defn unit-type-is-mineral-field
+(defn type-is-mineral-field
   [utype]
   (.isMineralField utype))
-
-;;;;;;;;;;;;;;;;;;;
-;; Base Location ;;
-;;;;;;;;;;;;;;;;;;;
-
-(defn bl-get-position
-  [bl]
-  (.getPosition bl))
 
 ;;;;;;;;;;;;;;;;;;;
 ;; Base-Location ;;
 ;;;;;;;;;;;;;;;:;;;
 
-(defn base-get-position
+(defn get-position
   [base]
   (.getPosition base))
 
-(defn base-get-title-position
+(defn get-title-position
   [base]
   (.getTilePosition base))
 
-(defn base-get-region
+(defn get-region
   [base]
   (.getRegion base))
 
@@ -134,7 +154,7 @@
 ;; Position ;;
 ;;;;;;;;;;;;;;
 
-(defn position-get-approx-distance
+(defn get-approx-distance
   [pos other-pos]
   (.getApproxDistance pos other-pos))
 
@@ -142,7 +162,7 @@
 ;; Tile ;;
 ;;;;;;;;;;
 
-(defn tile-position-get-distance
+(defn get-distance
   [pos other-pos]
   (.getDistance pos other-pos))
 
@@ -151,22 +171,22 @@
 ;; Game ;;
 ;;;;;;;;;;
 
-(defn game-leave-game
+(defn leave-game
   [game]
   (.leaveGame game))
 
-(defn game-get-neutral
+(defn get-neutral
   [game]
   (.neutral game))
 
 (defn game-get-minerals
   [game]
   (-> game
-      (game-get-neutral)
+      (get-neutral)
       (#(filter (fn [unit]
                   (-> unit
-                      (unit-get-type)
-                      (unit-type-is-mineral-field)))
+                      (get-type)
+                      (is-mineral-field?)))
                 %))))
 
 
@@ -182,11 +202,11 @@
   [game]
   (.self game))
 
-(defn game-can-build-here
+(defn can-build-here
   [game tpos unit-type]
   (.canBuildHere game tpos unit-type))
 
-(defn game-get-all-units
+(defn get-all-units
   [game]
   (.getAllUnits game))
 
@@ -195,13 +215,13 @@
 ;;;;;;;;;;;;
 
 (defn get-units
-  [player]
-  (.getUnits player))
+  [item]
+  (.getUnits item))
 
-(defn player-get-minerals
-  [player]
-  (.minerals player))
+(defn minerals
+  [item]
+  (.minerals item))
 
-(defn player-get-start-location
-  [player]
-  (.getStartLocation player))
+(defn get-start-location
+  [item]
+  (.getStartLocation item))

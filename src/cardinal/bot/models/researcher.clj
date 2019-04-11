@@ -49,7 +49,7 @@
   (let [base-list (get data :base-list)]
     (let [base (peek base-list)
           other-bases (pop base-list)
-          region (b/base-get-region base)]
+          region (b/get-region base)]
       (info (count other-bases))
       (info (count base-list))
       (-> state
@@ -85,20 +85,20 @@
   [{:keys [sub-units data] :as state}]
   (let [base (get data :current-base)
         unit (first sub-units)
-        base-position (b/base-get-position base)]
+        base-position (b/get-position base)]
     (info (format "Researcher: Go to the base"))
-    (info (b/unit-get-tile-position unit))
-    (if (b/unit-is-idle? unit)
-      (b/unit-move unit base-position)))
+    (info (b/get-tile-position unit))
+    (if (b/is-idle? unit)
+      (b/move unit base-position)))
   state)
 
 (defn s3-1-valid-s3-2
   [{:keys [sub-units data] :as state}]
   (let [base (get data :current-base)
         unit (first sub-units)
-        base-position (b/base-get-title-position base)
+        base-position (b/get-title-position base)
         res (> 10 (.getDistance base-position
-                                (b/unit-get-tile-position unit)))]
+                                (b/get-tile-position unit)))]
     (info (format "Researcher: s3-1 -> s3-2 = %b" res))
     res))
 

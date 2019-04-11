@@ -10,7 +10,6 @@
 ;;;;;;;;;
 ;; Doc ;;
 ;;;;;;;;;
-;;
 
 ;;;;;;;;;;;;;;;
 ;; Init data ;;
@@ -107,11 +106,11 @@
   [{:keys [main-state cur-command] :as state}]
   (let [game (:game @main-state)
         player (:player @main-state)
-        minerals (b/game-get-minerals game)
-        sl (b/player-get-start-location player)
+        minerals (b/get-minerals game)
+        sl (b/get-start-location player)
         near-mineral (->> minerals
-                             (map #(b/tile-position-get-distance
-                                    (b/unit-get-tile-position %)
+                             (map #(b/get-distance
+                                    (b/get-tile-position %)
                                     sl))
                              (sort)
                              (first))]
@@ -120,7 +119,7 @@
       (do
         (let [worker (get-in cur-command
                              [:data :unit])]
-          (b/unit-gather worker near-mineral))
+          (b/gather worker near-mineral))
         (assoc state :cur-command nil)))))
 
 ;; S2.2

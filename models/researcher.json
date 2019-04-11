@@ -1,0 +1,128 @@
+{
+  "init-fn":  [
+    "(clojure.core/require",
+    "'[[taoensso.timbre :as timbre",
+    "  :refer [log  trace  debug  info  warn  error  fatal  report",
+    "          logf tracef debugf infof warnf errorf fatalf reportf",
+    "          spy get-env]]",
+    " [fsm-clj.fsm :as fsm]",
+    " [cardinal.bot.managers :as m]",
+    " [cardinal.interop.base :as b]]))"
+  ],
+  "discription": "Researcher manager",
+  "init-data": {
+    "base-list": [],
+    "current-base-region": null,
+    "current-base": null
+  },
+  "start-state": "s1",
+  "template": {
+    "s1": {
+      "discription": "Wait for a list of bases",
+      "type": "normal",
+      "action": [
+        "(let [base-list (get data :base-list)]",
+        "  (info \"Researcher: get base-list..\")",
+        "  (if (empty? base-list)",
+        "    (update-in state [:data :base-list]",
+        "               (fn [_]",
+        "                 (apply vector"
+  "                        (b/get-start-locations))))"
+  "    state)))"
+
+
+
+      "edges": [{"state": "s2",
+        "discription": "Received the list of bases",
+        "valid?": ["#'cardinal.bot.models.researcher/s1-valid-s2"]}]
+    },
+    "s2": {
+      "type": "normal",
+      "discription": "Select a base",
+      "in-action": ["#'cardinal.bot.models.researcher/s2-in-action"],
+      "edges": [{"state": "s3",
+        "discription": "A base selected",
+        "valid?": ["#'cardinal.bot.models.researcher/s2-valid-s3"]}]
+    },
+    "s3": {
+      "discription": "Exploration",
+      "action": ["#'cardinal.bot.models.researcher/s3-action"],
+      "edges": [{"state": "s4",
+        "discription": "A rival spotted",
+        "valid?": ["#'cardinal.bot.models.researcher/s3-valid-s4"]}],
+        "type": "heir",
+        "start-state": "s3-1",
+        "fsm": {
+          "s3-1": {
+            "type": "normal",
+            "discription": "Move to the base",
+            "action": ["#'cardinal.bot.models.researcher/s3-1-action"],
+            "edges": [{"state": "s3-2",
+              "discription": "The base reached",
+              "valid?": ["#'cardinal.bot.models.researcher/s3-1-valid-s3-2"]}]
+          },
+          "s3-2": {
+            "type": "heir",
+            "discription": "Look up for resoueces and buildings",
+            "action": ["#'cardinal.bot.models.researcher/s3-2-action"],
+            "edges": [{"state": "s3-3",
+              "discription": "Base explored, rival not registered",
+              "valid?": ["#'cardinal.bot.models.researcher/s3-2-valid-s3-3"]}],
+              "start-state": "s3-2-1",
+              "fsm": {
+                "s3-2-1": {
+                  "type": "normal",
+                  "discription": "Look up",
+                  "action": ["#'cardinal.bot.models.researcher/s3-2-1-action"],
+                  "edges": [{"state": "s3-2-2",
+                    "discription": "Resources found",
+                    "valid?": ["#'cardinal.bot.models.researcher/s3-2-1-valid-s3-2-2"]},
+                    {"state": "s3-2-3",
+                      "discription": "Buildings found",
+                      "valid?": ["#'cardinal.bot.models.researcher/s3-2-1-valid-s3-2-3"]}]
+                },
+                "s3-2-2": {
+                  "type": "normal",
+                  "discription": "Storage of resources coords",
+                  "action": ["#'cardinal.bot.models.researcher/s3-2-2-action"],
+                  "edges": [{"state": "s3-2-1",
+                    "discription": "Save resource",
+                    "valid?": ["#'cardinal.bot.models.researcher/s3-2-2-valid-s3-2-1"]}]
+                },
+                "s3-2-3": {
+                  "type": "normal",
+                  "discription": "Storage of buildings coords",
+                  "action": ["#'cardinal.bot.models.researcher/s3-2-3-action"],
+                  "edges": [{"state": "s3-2-1",
+                    "discription": "Save building",
+                    "valid?": ["#'cardinal.bot.models.researcher/s3-2-3-valid-s3-2-1"]}]
+                }}},
+                "s3-3": {
+                  "type": "normal",
+                  "discription": "Check the list",
+                  "action": ["#'cardinal.bot.models.researcher/s3-3-action"],
+                  "edges": [{"state": "end",
+                    "discription": "The list of bases is empty",
+                    "valid?": ["#'cardinal.bot.models.researcher/s3-3-valid-end"]},
+                    {"state": "s2",
+                      "discription": "The list of bases is not empty",
+                      "valid?": ["#'cardinal.bot.models.researcher/s3-3-valid-s2"]}]
+                }
+        }
+    },
+    "s4": {
+      "type": "normal",
+      "discription": "Increase distance to the rival",
+      "action": ["#'cardinal.bot.models.researcher/s4-action"],
+      "edges": [{"state": "s4",
+        "discription": "Increase distance to the rival",
+        "valid?": ["#'cardinal.bot.models.researcher/s4-valid-s4"]},
+        {"state": "s3",
+          "discription": "Safe distance to the rival",
+          "valid?": ["#'cardinal.bot.models.researcher/s4-valid-s3"]}]
+    },
+    "end": {
+      "type": "normal"
+    }
+  }
+}
